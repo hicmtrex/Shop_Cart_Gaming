@@ -18,12 +18,12 @@ function App() {
     setText(prevText => [...prevText,val])
   }
 
-  function Delete() {
+  function remove() {
     setText('')
     setReasult('')
   }
 
-function remove() {
+function Delete() {
   setText(text => text.slice(1))
    setReasult('')
 }
