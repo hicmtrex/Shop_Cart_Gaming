@@ -1,56 +1,84 @@
-import React, { useState } from 'react'
-import './App.css'
-import Button from './components/Button'
-import Output from './components/Output'
-import * as math from 'mathjs';
+import React, { useEffect, useState } from 'react'
+import { Route, Switch } from 'react-router-dom';
+
+//Components
+import Home from './components/Home';
+import ProductsList from './components/ProductsList';
+import NavBar from './components/NavBar'
+import Footer from './components/Footer'
+import Cart from './components/Cart';
+
+export const ProductContext = React.createContext();
+
+const LOCAL_STORAGE = 'graphiqueCart.hicm';
 
 function App() {
-  const [text, setText] = useState('')
-  const [result, setReasult] = useState('')
+  const [cartItems, setCartItems] = useState([]);
+  const [showCart, setShowCart] = useState(false);
 
-  function handlerCalc() {
-    if (text === '') return;
-  const output = text.join('')
-  setReasult(math.evaluate(output))
-}
+  useEffect(() => {
+    const storage = localStorage.getItem(LOCAL_STORAGE);
+    if(storage != null) setCartItems(JSON.parse(storage))
+},[])
 
-  function addText(val) {
-    setText(prevText => [...prevText,val])
+ useEffect(() => {
+  localStorage.setItem(LOCAL_STORAGE,JSON.stringify(cartItems))
+ }, [cartItems]); 
+  
+
+function handleAdd(product) {
+  const exist = cartItems.find(p => p.id === product.id)
+  if (exist) {
+    setCartItems(cartItems.map((item) => item.id === product.id ? 
+    {...exist,qty:item.qty + 1} : item))
+  } else {
+    setCartItems([...cartItems, {...product,qty:1}])
+  }
+  };
+
+  function handleRemove(product) {
+    const exist = cartItems.find(p => p.id === product.id)
+    if (exist.qty === 1) {
+      setCartItems(cartItems.filter(el => el.id !== product.id))
+    } else {
+      setCartItems(cartItems.map((item) => item.id === product.id ? 
+      {...exist,qty:item.qty - 1} : item))
+    }
   }
 
-  function remove() {
-    setText('')
-    setReasult('')
+  function handleDelete(product) {
+    setCartItems(
+      cartItems.filter(el => el.id !== product.id)
+    )
   }
 
-function Delete() {
-  setText(text => text.slice(1))
-   setReasult('')
+function hideCartHandler() {
+  setShowCart(false)
 }
+
+  const cartItemsContext = {
+    handleAdd,
+    cartItems,
+    setCartItems,
+    setShowCart,
+    handleRemove,
+    handleDelete,
+    showCart,
+     cartItemsLength: cartItems.length
+  }
 
   return (
-    <div class="calculator-grid">
-      <Output text={text} result={result}/>
-      <Button num="AC" addText={remove} styleName="span-two"/>
-      <Button num="DEL" addText={Delete} />
-      <Button num="/" addText={addText}/>
-      <Button num="1" addText={addText}/>
-      <Button num="2" addText={addText}/>
-      <Button num="3" addText={addText}/>
-      <Button num="*" addText={addText}/>
-      <Button num="4" addText={addText}/>
-      <Button num="5" addText={addText}/>
-      <Button num="6" addText={addText}/>
-      <Button num="+" addText={addText}/>
-      <Button num="7" addText={addText}/>
-      <Button num="8" addText={addText}/>
-      <Button num="9" addText={addText}/>
-      <Button  num="-" addText={addText} />
-      <Button  num="."  addText={addText}/>
-      <Button  num="0" addText={addText} /> 
-      <Button  num="=" addText={handlerCalc} styleName="span-two"/>
-      </div>
- 
+    <ProductContext.Provider value={cartItemsContext}>
+      <NavBar setShowCart={setShowCart} cartItemsLength={cartItems.length} />
+      <main className="container mt-3">
+        {showCart && <Cart cartItems={cartItems} hideCartHandler={hideCartHandler}/>}
+      <Switch>
+        <Route path='/' exact component={Home} />
+        <Route path='/products' component={ProductsList}/>
+        </Switch>
+        </main>
+      <Footer/>
+      </ProductContext.Provider>
   )
 }
 

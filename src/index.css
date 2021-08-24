@@ -1,0 +1,24 @@
+#root{
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+
+.cartButton:hover .badge,
+.cartButton:active .badge {
+  background-color: #92320c;
+}
+  
+.button span {
+  margin: 0 0.5rem;
+}
+
+.fa-shopping-cart{
+    margin-left: 20px;
+}
+
+
+.footer{
+  background-color: #8a2b06;
+}
